@@ -4,15 +4,21 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,21 +45,20 @@ fun AppUI() {
     var doubleMeaning by remember { mutableStateOf("") }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF6A11CB), Color(0xFF2575FC))
-                )
-            ),
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "🤫 ChhupaRustam",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        color = Color.White
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 26.sp,
+                        color = Color.White,
+                        modifier = Modifier.graphicsLayer {
+                            shadowElevation = 16f
+                            renderEffect = null
+                        }
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -63,79 +68,123 @@ fun AppUI() {
         }
     ) { innerPadding ->
 
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedTextField(
-                value = userInput,
-                onValueChange = { userInput = it },
-                label = { Text("Enter your text...", color = Color.White) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
-            )
-
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Button(
-                onClick = {
-                    // Dummy decode logic
-                    normalMeaning = "👉 Normal: ${userInput.ifEmpty { "Nothing entered" }}"
-                    doubleMeaning = "😏 Double Meaning: Hidden spicy context detected!"
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF5722)
+                .background(
+                    Brush.linearGradient(
+                        listOf(Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364))
+                    )
                 )
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("🔍 Decode", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
+                OutlinedTextField(
+                    value = userInput,
+                    onValueChange = { userInput = it },
+                    label = {
+                        Text("💬 Enter your text...", color = Color(0xFFBBDEFB))
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.White.copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Cyan,
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedLabelColor = Color.Cyan,
+                        cursorColor = Color.Cyan
+                    )
+                )
 
-            Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(25.dp))
 
-            if (normalMeaning.isNotEmpty()) {
-                MeaningCard("Clean Sense", normalMeaning, Color(0xFF4CAF50))
-            }
+                ExpensiveButton(
+                    onClick = {
+                        normalMeaning = "👉 Normal: ${userInput.ifEmpty { "Nothing entered" }}"
+                        doubleMeaning = "😏 Double Meaning: Hidden spicy context detected!"
+                    }
+                )
 
-            if (doubleMeaning.isNotEmpty()) {
-                MeaningCard("Hidden Sense", doubleMeaning, Color(0xFFFFC107))
+                Spacer(modifier = Modifier.height(40.dp))
+
+                if (normalMeaning.isNotEmpty()) {
+                    MeaningCard("✨ Clean Sense", normalMeaning, Color(0xFF00E676))
+                }
+
+                if (doubleMeaning.isNotEmpty()) {
+                    MeaningCard("🔥 Hidden Sense", doubleMeaning, Color(0xFFFFC107))
+                }
             }
         }
     }
 }
 
 @Composable
-fun MeaningCard(title: String, text: String, bgColor: Color) {
+fun ExpensiveButton(onClick: () -> Unit) {
+    var pressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (pressed) 0.95f else 1f)
+
+    Button(
+        onClick = { onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale)
+            .clickable(
+                onClick = { pressed = !pressed }
+            ),
+        shape = RoundedCornerShape(20.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Brush.horizontalGradient(
+                listOf(Color(0xFFFF512F), Color(0xFFDD2476))
+            ).toColor()
+        ),
+        elevation = ButtonDefaults.buttonElevation(12.dp)
+    ) {
+        Text(
+            "🔍 Decode",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
+}
+
+// Convert Brush to Solid Color (hack for Button background)
+fun Brush.toColor(): Color = Color.White.copy(alpha = 0f)
+
+@Composable
+fun MeaningCard(title: String, text: String, accent: Color) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+            .padding(vertical = 12.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = bgColor.copy(alpha = 0.15f)
+            containerColor = Color.White.copy(alpha = 0.1f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = title,
-                fontSize = 18.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = bgColor
+                color = accent
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = text,
-                fontSize = 16.sp,
+                fontSize = 17.sp,
                 color = Color.White,
                 textAlign = TextAlign.Start
             )
