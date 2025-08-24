@@ -1,7 +1,6 @@
 # 🕵️‍♂️ Chhuparustam  
 
-Chhuparustam is a fun Android app built with **Kotlin** and **Jetpack Compose**, designed to deliver a smooth and modern user experience.  
-It comes with sleek UI, animations, and multiple creative screens that make it engaging and interactive.  
+Chhuparustam is a fun Android app built with **Kotlin** and **Jetpack Compose**, designed to deliver a smooth and modern user experience.It comes with sleek UI, animations, and multiple creative screens that make it engaging and interactive.  
 
 ---
 
